@@ -1,3 +1,4 @@
+"use strict"
 class Validator {
   hasError = false;
   invalidInputs = [];
