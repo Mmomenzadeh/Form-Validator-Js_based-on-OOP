@@ -1,4 +1,4 @@
-"use strict"
+"use strict";
 class Validator {
   hasError = false;
   invalidInputs = [];
@@ -8,16 +8,27 @@ class Validator {
         return true;
       }
       this.hasError = true;
-      this.invalidInputs.push({
+      this.invalidInputs.unshift({
         input,
         message: "This input can not be empty ",
+      });
+    },
+    min: (input, args) => {
+      if (input.value.length >= parseInt(args)) {
+        return true;
+      }
+
+      this.hasError = true;
+      this.invalidInputs.unshift({
+        input,
+        message: `The minimum entered character must be ${args}`,
       });
     },
   };
 
   constructor(form) {
     form = document.querySelector(form);
-     //For the availability of the form in the whole class
+    //For the availability of the form in the whole class
     this.form = form;
     //manage submit event for form
     form.onsubmit = (e) => {
@@ -25,15 +36,23 @@ class Validator {
       // reset error
       this.hasError = false;
       this.invalidInputs = [];
-      this.removeErrors()
+      this.removeErrors();
       //Determine each rule for each input
       const inputs = form.querySelectorAll("[data-rules]");
       for (const input of inputs) {
         const rules = input.getAttribute("data-rules").split("|");
 
         for (const rule of rules) {
-          if (this.definedRules.hasOwnProperty(rule)) {
-            this.definedRules[rule](input);
+          let givenRule = rule;
+          let args = null;
+
+          if (rule.indexOf(":") > -1) {
+            const splitedRule = rule.split(":");
+            givenRule = splitedRule[0];
+            args = splitedRule[1];
+          }
+          if (this.definedRules.hasOwnProperty(givenRule)) {
+            this.definedRules[givenRule](input, args);
           }
         }
       }
